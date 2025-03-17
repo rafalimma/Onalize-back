@@ -16,14 +16,9 @@ class EmployeeDataSerializer(serializers.ModelSerializer):
         model = Employee
         fields = '__all__'
 
-
-class AnalysisDateSerializer(serializers.ModelSerializer):
+class AnalysisDateSerializer(serializers.Serializer):
     data_inicio = serializers.DateField(required=True)
     data_fim = serializers.DateField(required=True)
-
-    class Meta:
-        model = EmailTalks
-        fields = '__all__'
 
 
 # class EmailTalksSerializer(serializers.ModelSerializer):

@@ -17,8 +17,12 @@ class EmailDataView(APIView):
             data_inicio = serializer.validated_data['data_inicio']
             data_fim = serializer.validated_data['data_fim']
 
-            periodo_analise = (EmailTalks.objects.filter(data_envio__range=(data_inicio, data_fim)).values('hash_id').annotate(total=Count('id')))
-            print('vai mostrar o período de análise caralho')
+            periodo_analise = (EmailTalks.objects.filter
+                               (data_envio__range=(data_inicio, data_fim))
+                               .values('hash_id', 'origem', 'remetente', 'destinatario')
+                               .annotate(total=Count('id'))
+                               )
+            print('vai mostrar o período de análise')
             print(periodo_analise)
 
             return Response(list(periodo_analise))
