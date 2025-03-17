@@ -14,7 +14,7 @@ class EmployeeAdmin(admin.ModelAdmin):
 # Personalizando a exibição do EmailTalks
 @admin.register(EmailTalks)
 class EmailTalksAdmin(admin.ModelAdmin):
-    list_display = ('remetente', 'destinatario', 'data_envio')
+    list_display = ('remetente', 'destinatario', 'data_envio', 'hash_id', 'origem')
     search_fields = ('remetente__nome', 'destinatario__nome')
     list_filter = ('data_envio',)
     ordering = ('-data_envio',)

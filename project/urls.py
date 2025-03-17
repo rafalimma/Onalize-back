@@ -17,12 +17,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from ona.api import viewsets as employeeviewsets
+from ona.views import EmailDataView
 from rest_framework import routers
 
 route = routers.DefaultRouter()
+# route.register é apenas para viewsets do Django
+# cria todas as rotas necessárias GET POST PUT etc
 route.register(r'employees', employeeviewsets.EmployeeDataViewSet, basename='Employees')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('employees', include(route.urls))
+    path('', include(route.urls)),
+    # path usado paenas para registrar rotas individuais das views
+    path('employeesemails', EmailDataView.as_view())
 ]
