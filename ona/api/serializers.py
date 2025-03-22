@@ -16,14 +16,14 @@ class EmployeeDataSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class EmailRelationSerializer(serializers.ModelSerializer):
-    colaborador1 = EmployeeDataSerializer(source='destinatario', read_only=True)
-    colaborador2 = EmployeeDataSerializer(source='remetente', read_only=True)
+    colaborador1 = serializers.PrimaryKeyRelatedField(source='destinatario', read_only=True)
+    colaborador2 = serializers.PrimaryKeyRelatedField(source='remetente', read_only=True)
 
     class Meta:
         model = EmailTalks
         fields = ['hash_id', 'colaborador1', 'colaborador2']
 
-
+# esse serializer vai estar no reqeust dos times também
 class AnalysisDateSerializer(serializers.Serializer):
     data_inicio = serializers.DateField(required=True)
     data_fim = serializers.DateField(required=True)
