@@ -31,23 +31,22 @@ class EmailDataView(APIView):
     def post(self, request):
         print('entrou no post')
         serializer = AnalysisDateSerializer(data=request.data)
-
         if serializer.is_valid():
-            print('entrou aqui')
             data_inicio = serializer.validated_data['data_inicio']
             data_fim = serializer.validated_data['data_fim']
-
-            periodo_analise = (EmailTalks.objects.filter
-                               (data_envio__range=(data_inicio, data_fim))
-                               .values('hash_id', 'origem', 'remetente', 'destinatario')
-                               .annotate(total=Count('id'))
-                               )
-            print('vai mostrar o período de análise')
-            print(periodo_analise)
-
-            return Response(list(periodo_analise))
-        print('erro no serializer')
-        return Response(serializer.errors)
+            interactions = (EmailTalks.objects
+                            .filter(data_envio__range=(data_inicio, data_fim))
+                            .values('hash_id')
+                            .annotate(total=Count('id'))
+                        )
+            result = []
+            for interaction in interactions:
+                emails = EmailTalks.objects.filter(hash_id=interaction['hash_id']).first()
+                if emails:
+                    interaction_data = EmailRelationSerializer(emails).data
+                    interaction_data['total'] = interaction['total'] # total vem do filter que foi feito no interactions
+                    result.append(interaction_data)
+            return Response(result)
     
 class EmployeeRelationView(APIView):
     def get(self, request):
