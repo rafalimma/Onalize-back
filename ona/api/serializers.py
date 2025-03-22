@@ -1,14 +1,13 @@
 
 from rest_framework import serializers
 from ona.models import Departs, Employee, EmailTalks
+from django.db.models import Count, Min
 
-
+# trás apenas os employees com departamentos:
 class DepartsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Departs
         fields = '__all__'
-
-
 class EmployeeDataSerializer(serializers.ModelSerializer):
     depart = DepartsSerializer(read_only=True)  # Dados completos do departamento
 
@@ -16,15 +15,15 @@ class EmployeeDataSerializer(serializers.ModelSerializer):
         model = Employee
         fields = '__all__'
 
+class EmailRelationSerializer(serializers.ModelSerializer):
+    colaborador1 = EmployeeDataSerializer(source='destinatario', read_only=True)
+    colaborador2 = EmployeeDataSerializer(source='remetente', read_only=True)
+
+    class Meta:
+        model = EmailTalks
+        fields = ['hash_id', 'colaborador1', 'colaborador2']
+
+
 class AnalysisDateSerializer(serializers.Serializer):
     data_inicio = serializers.DateField(required=True)
     data_fim = serializers.DateField(required=True)
-
-
-# class EmailTalksSerializer(serializers.ModelSerializer):
-#     destinatario = serializers.StringRelatedField()  # Apenas o nome do destinatário
-#     remetente = serializers.StringRelatedField()
-
-#     class Meta:
-#         model = EmailTalks
-#         fields = ['id', 'remetente', 'destinatario', 'data_envio']

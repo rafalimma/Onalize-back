@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from ona.api import viewsets as employeeviewsets
-from ona.views import EmailDataView
+from ona.views import EmailDataView, EmailInteractionView
 from rest_framework import routers
 
 route = routers.DefaultRouter()
@@ -29,5 +29,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(route.urls)),
     # path usado paenas para registrar rotas individuais das views
-    path('employeesemails', EmailDataView.as_view())
+    path('employeesemailsbyperiod/', EmailDataView.as_view()),
+    path('employees-relations/', EmailInteractionView.as_view(), name='employees-relations')
 ]
