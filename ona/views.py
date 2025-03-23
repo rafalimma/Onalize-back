@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from ona.api.serializers import AnalysisDateSerializer, EmailRelationSerializer
 from ona.models import EmailTalks, Employee, Departs
-from django.db.models import Count, Min
+from django.db.models import Count, F, Case, When, Value
 from django.contrib.postgres.aggregates import ArrayAgg
 from datetime import datetime, timedelta, date
 import hashlib
@@ -59,32 +59,26 @@ class TeamInteractionView(APIView):
             data_inicio = serializer.validated_data['data_inicio']
             data_fim = serializer.validated_data['data_fim']
             interactions = (EmailTalks.objects
-                            .filter(data_fim, data_inicio)
-                            .values('remetente__depart', 'destinatario__depart')
+                            .filter(data_envio__range=(data_inicio, data_fim))
+                            .annotate(
+                                time1=Case(
+                                    When(remetente__depart__id__lt=F('destinatario__depart__id'), then=F('remetente__depart__nome')),
+                                    default=F('destinatario__depart__nome')
+                                ),
+                                time2=Case(
+                                    When(remetente__depart__id__lt=F('destinatario__depart__id'), then=F('destinatario__depart__nome')),
+                                    default=F('remetente__depart__nome')
+                                )
+                            )
+                            .exclude(time1=F('time2'))
+                            .values('time1', 'time2')
                             .annotate(total=Count('id'))
                             .order_by('-total')
                         )
-            result = []
-            for interaction in interactions:
-                remetente_time = interaction['remetente__depart']
-                destinatario_time = interaction['destinatario__depart']
-
-                result.append({
-                    'time1': remetente_time,
-                    'time_2': destinatario_time,
-                    'total_instaracoes': interaction['total']
-                })
-            return Response(result)
+            return Response(interactions)
 
 def generate_hash(sender, receiver):
     interaction = f"{min(sender, receiver)}-{max(sender, receiver)}"
     return hashlib.sha256(interaction.encode()).hexdigest()
-
-    
-# class EmployeeRelationView(APIView):
-#     def get(self, request):
-#         employees = Employee.objects.all()
-#         serializer = EmailRelationSerializer(employees, many=True)
-#         return Response(serializer.data)
 
 
