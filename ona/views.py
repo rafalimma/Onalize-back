@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from ona.api.serializers import AnalysisDateSerializer, EmailRelationSerializer
 from ona.models import EmailTalks, Employee, Departs
 from django.db.models import Count, F, Case, When, Value
-from django.contrib.postgres.aggregates import ArrayAgg
+from django.contrib.postgres.aggregates import ArrayAgg  #ignore
 from datetime import datetime, timedelta, date
 import hashlib
 
@@ -15,8 +15,9 @@ class EmailInteractionView(APIView):
     def get(self, request):
         print('entrou no get')
         hoje = date.today()
+        dmenosquinze = hoje - timedelta(days=30)
         interactions = (EmailTalks.objects
-                        .filter(data_envio__range=((hoje - timedelta(days=30)), hoje))
+                        .filter(data_envio__range=("2024-01-01", "2025-03-25"))
                         .values('hash_id')
                         .annotate(total=Count('id'))
                     )
